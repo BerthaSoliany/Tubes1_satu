@@ -1,0 +1,14 @@
+{
+  "name": "Nearest",
+  "version": "1.0",
+  "authors": [
+    "Kelompok satu (49)"
+  ],
+  "description": "Bot that run by spinning and target the nearest bot.",
+  "homepage": "",
+  "countryCodes": [
+    "id"
+  ],
+  "platform": ".Net 6.0",
+  "programmingLang": "C# 10.0"
+}
