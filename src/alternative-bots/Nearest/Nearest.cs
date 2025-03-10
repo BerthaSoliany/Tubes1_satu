@@ -65,11 +65,10 @@ public class Nearest : Bot
         } 
     }
 
-    // Shot the nearest bot
     public override OnTick(TickEvent e){
         if (target!=null){
-            var angleTarget = Math.Atan2(target.X - X, target.Y - Y);
-            var angleDegrees = angleTarget*(180/Math.PI);
+            var angleToTarget = Math.Atan2(target.X - X, target.Y - Y);
+            var angleDegrees = angleToTarget*(180/Math.PI);
             TurnGunTo(angleDegrees);
 
             if (nearest < 50 && Energy > 50){
@@ -84,6 +83,21 @@ public class Nearest : Bot
     }
 
     public override void OnHitWall(HitWallEvent e){
-
+        SetTurnLeft(5);
     }
+
+    // We hit another bot -> if it's our fault, we'll stop turning and moving,
+    // so we need to turn again to keep spinning.
+    // public override void OnHitBot(HitBotEvent e)
+    // {
+    //     var bearing = BearingTo(e.X, e.Y);
+    //     if (bearing > -10 && bearing < 10)
+    //     {
+    //         Fire(3);
+    //     }
+    //     if (e.IsRammed)
+    //     {
+    //         TurnLeft(10);
+    //     }
+    // }
 }
