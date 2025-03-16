@@ -1,6 +1,6 @@
 using Robocode.TankRoyale.BotApi;
 using Robocode.TankRoyale.BotApi.Events;
-
+using System;
 using System.Drawing;
 using System.IO;
 using Microsoft.Extensions.Configuration;
@@ -40,6 +40,13 @@ public class Nearest : Bot
         RadarColor = Color.Black;
         ScanColor = Color.Yellow;
 
+        // AdjustGunForBodyTurn = true;
+
+        // AdjustRadarForGunTurn = true;
+        // AdjustRadarForBodyTurn = true;
+
+        // RadarTurnRate = 5;
+
         // Repeat while the bot is running
         while (IsRunning)
         {
@@ -50,6 +57,7 @@ public class Nearest : Bot
             // Start moving (and turning)
             Forward(10_000);
         }
+        // Fire(1);
     }
 
     // We scanned another bot -> see distance
@@ -57,47 +65,57 @@ public class Nearest : Bot
     private double nearest = double.MaxValue;
     public override void OnScannedBot(ScannedBotEvent evt)
     {
-        double distance = DistanceTo(e.X, evt.Y);
+        double distance = DistanceTo(evt.X, evt.Y);
 
         if (distance < nearest) {
             nearest = distance;
-            target = e;
+            target = evt;
         } 
     }
 
-    public override OnTick(TickEvent e){
+    public override void OnTick(TickEvent tickEvent){
         if (target!=null){
             var angleToTarget = Math.Atan2(target.X - X, target.Y - Y);
             var angleDegrees = angleToTarget*(180/Math.PI);
-            TurnGunTo(angleDegrees);
 
-            if (nearest < 50 && Energy > 50){
-                Fire(3);
-            } else{
-                Fire(2);
+            if (angleDegrees<0){
+                angleDegrees+=360;
             }
+
+            double gunTurn = NormalizeRelativeAngle(angleDegrees - GunDirection);
+            SetTurnGunRight(gunTurn);
+
+            if (nearest < 50 && Energy > 50)
+                Fire(3);
+            else
+                Fire(2);
+
             target = null;
-            nearest = MaxValue;
+            nearest = double.MaxValue;
         }
-        ReScan();
+        Rescan();
     }
 
-    public override void OnHitWall(HitWallEvent e){
-        SetTurnLeft(5);
-    }
+    // public override void OnBulletFired(BulletFiredEvent e){
+    //     double targetX = e.Bullet.X;
+    //     double targetY = e.Bullet.Y;
 
-    // We hit another bot -> if it's our fault, we'll stop turning and moving,
-    // so we need to turn again to keep spinning.
-    // public override void OnHitBot(HitBotEvent e)
-    // {
-    //     var bearing = BearingTo(e.X, e.Y);
-    //     if (bearing > -10 && bearing < 10)
-    //     {
-    //         Fire(3);
+    //     double angle = Math.Atan2(targetX-X,targetY-Y);
+    //     double angleDegrees = angle*(180.0/Math.PI);
+
+    //     if (angleDegrees < 0){
+    //         angleDegrees += 360;
     //     }
-    //     if (e.IsRammed)
-    //     {
-    //         TurnLeft(10);
-    //     }
+
+    //     // Turn toward the direction
+    //     SetTurnRight(NormalizeRelativeAngle(angleDegrees - Direction));
+        
+    //     Forward(100); // Move closer — adjust distance as needed
     // }
+
+	public override void OnHitWall(HitWallEvent e){
+        SetBack(100);
+        SetTurnRight(90);
+    }
+
 }
