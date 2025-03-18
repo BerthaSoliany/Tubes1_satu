@@ -26,7 +26,7 @@ public class RandomStrafeBot : Bot
         TracksColor = Color.Gray;
         GunColor = Color.Red;
 
-        AdjustGunForBodyTurn = false; // Memisahkan gun dan radar dari body (masih ngebug jg)
+        AdjustGunForBodyTurn = true; // Memisahkan gun dan radar dari body (masih ngebug jg)
         GunTurnRate = MaxGunTurnRate;
 
         while (IsRunning)
@@ -42,6 +42,7 @@ public class RandomStrafeBot : Bot
             //     isAvoidingWall = true;
             // }
             // else 
+            SetTurnGunLeft(10000);
             if (isStopped)
             {
                 isAvoidingWall = false;
