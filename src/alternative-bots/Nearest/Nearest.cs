@@ -14,9 +14,12 @@ using Microsoft.Extensions.Configuration.Json;
 public class Nearest : Bot
 {
     int? nearestId;
+    int count = 0;
+    int frustration = 0;
     // int turnDirection = 1;
     double firepower;
     double nearestDistance = double.MaxValue;
+    bool maju = false;
     // The main method starts our bot
     static void Main(string[] args)
     {
@@ -49,9 +52,14 @@ public class Nearest : Bot
         // Repeat while the bot is running
         while (IsRunning)
         {
-            SetTurnLeft(10_000);
-            MaxSpeed = 5;
-            Forward(10_000);
+            if(!maju){
+                SetTurnLeft(10_000);
+                MaxSpeed = 5;
+                Forward(10_000);
+            }
+            else{
+                maju = false;
+            }
         }
     }
 
@@ -80,11 +88,36 @@ public class Nearest : Bot
             //     Fire(.1);
             Fire(firepower);
         }
+        else count++;
+        if(count>=5) {
+            nearestId = null;
+            nearestDistance = double.MaxValue;
+            count = 0;
+        }
+        if(frustration>=5){
+            if (evt.ScannedBotId == nearestId){
+                var bearing = BearingTo(evt.X, evt.Y);
+                TurnLeft(bearing);
+                Forward(DistanceTo(evt.X, evt.Y)/2);
+                frustration = 0;
+            }
+        }
     }
     
+    public override void OnBulletHitBullet(BulletHitBulletEvent bulletHitBulletEvent){
+        frustration++;
+    }
+
+    public override void OnBulletHitWall(BulletHitWallEvent bulletHitWallEvent){
+        frustration++;
+    }
+
+    public override void OnBulletHit(BulletHitBotEvent bulletHitBotEvent){
+        frustration = 0;
+    }
+
     public override void OnHitWall(HitWallEvent e){
-        SetBack(10);
-        TurnRight(10);
+        Back(50);
     }
 
     // public override void OnHitBot(HitBotEvent e){
