@@ -48,6 +48,9 @@ public class Nearest : Bot
         TurretColor = Color.White;
         RadarColor = Color.Black;
         ScanColor = Color.Cyan;
+        
+        AdjustGunForBodyTurn = true;
+        GunTurnRate = MaxGunTurnRate;
 
         // Repeat while the bot is running
         while (IsRunning)
