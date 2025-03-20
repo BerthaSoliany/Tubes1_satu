@@ -20,6 +20,7 @@ public class BorderBot : Bot
         bool kiri = false;
         bool maju = true;
         bool awal = true;
+        bool awal2 = true;
         double x = X;
         double y = Y;
         double direction = Direction;
@@ -27,6 +28,7 @@ public class BorderBot : Bot
         double height = ArenaHeight;
         double distanceToWall = 0;
         double angleToWall = 0;
+        double angleToBody = 0;
         double wallkiri = x;
         double wallkanan = width - x;
         double wallBawah = y;
@@ -78,35 +80,51 @@ public class BorderBot : Bot
                 }
 
                 // Bergerak maju menuju tembok
-                Forward(distanceToWall-10);  // Bergerak maju hingga mencapai tembok
+                Forward(distanceToWall-20);  // Bergerak maju hingga mencapai tembok
                 TurnRight(90);
                 awal = false;
             }
             else{
-                AdjustGunForBodyTurn = true; // Separate gun and radar from body    
-                if(maju){
-                    if(DistanceRemaining == 0){
-                        SetForward(100);
-                        maju = false;
+                AdjustGunForBodyTurn = true; // Separate gun and radar from body   
+                if(awal2){
+                    // selalu buat gun sejajar dengan body dulu di awal 
+                    angleToBody = GunDirection - Direction;
+                    if(angleToBody < 0){
+                        angleToBody += 360;
                     }
-                }
-                else {
-                    if(DistanceRemaining == 0){
-                        SetBack(100);
-                        maju = true;
+                    if(angleToBody < 360 - angleToBody){
+                        TurnGunRight(angleToBody);
                     }
+                    else{
+                        TurnGunLeft(360 - angleToBody);
+                    }
+                    awal2 = false;
                 }
+                else{
+                    if(maju){
+                        if(DistanceRemaining == 0){
+                            SetForward(100);
+                            maju = false;
+                        }
+                    }
+                    else {
+                        if(DistanceRemaining == 0){
+                            SetBack(100);
+                            maju = true;
+                        }
+                    }
 
-                if(kiri) {
-                    if(GunTurnRemaining == 0){
-                        SetTurnGunLeft(180);
-                        kiri = false;
+                    if(kiri) {
+                        if(GunTurnRemaining == 0){
+                            SetTurnGunLeft(180);
+                            kiri = false;
+                        }
                     }
-                }
-                else {
-                    if(GunTurnRemaining == 0){
-                        SetTurnGunRight(180);
-                        kiri = true;
+                    else {
+                        if(GunTurnRemaining == 0){
+                            SetTurnGunRight(180);
+                            kiri = true;
+                        }
                     }
                 }
             }
