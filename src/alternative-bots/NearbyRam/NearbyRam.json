@@ -1,0 +1,14 @@
+{
+  "name": "Nearby Ram",
+  "version": "1.0",
+  "authors": [
+    "Ram the nearby bot"
+  ],
+  "description": "",
+  "homepage": "",
+  "countryCodes": [
+    "id"
+  ],
+  "platform": ".Net 6.0",
+  "programmingLang": "C# 10.0"
+}
