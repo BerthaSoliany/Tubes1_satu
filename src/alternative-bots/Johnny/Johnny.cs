@@ -31,16 +31,17 @@ public class Johnny : Bot
     // Called when a new round is started -> initialize and do some movement
     public override void Run()
     {
-        BodyColor = Color.Black;
-        TurretColor = Color.Blue;
-        RadarColor = Color.Black;
-        ScanColor = Color.Orange;
+        BodyColor = Color.Cyan;
+        TurretColor = Color.Yellow;
+        RadarColor = Color.Cyan;
+        ScanColor = Color.DeepPink;
+        BulletColor = Color.Yellow;
         
-        bool right = true;
         // Repeat while the bot is running
         while (IsRunning)
         {
-            AdjustGunForBodyTurn = true;
+            // Gun follows the body
+            AdjustGunForBodyTurn = false;
 
             // SpinBot basic movement
             SetTurnLeft(10_000);
@@ -53,6 +54,8 @@ public class Johnny : Bot
     // We scanned another bot -> fire hard!
     public override void OnScannedBot(ScannedBotEvent e)
     {
+        // Gun tracking enemy on scan
+        AdjustGunForBodyTurn = true;
         // Get angle and distance of enemy            
         var bearing = BearingTo(e.X, e.Y);
         var distance = DistanceTo(e.X, e.Y);
@@ -64,14 +67,14 @@ public class Johnny : Bot
         SetTurnGunRight(gunTurn);
 
         // Set SmartFire
-        if (distance > 200){
-            SetFire(1.5);
-        }
-        else if (distance < 50){
+        if (distance > 200 && Energy > 10){
             SetFire(2.4);
         }
-        else{
+        else if (distance <= 200 && Energy > 10){
             SetFire(3);
+        }
+        else if (distance < 50 && Energy < 10){
+            SetFire(1.5);
         }
 
         SetForward(10_000);
@@ -82,18 +85,20 @@ public class Johnny : Bot
         Go();   
     }
 
-    // We hit another bot -> if it's our fault, we'll stop turning and moving,
-    // so we need to turn again to keep spinning.
     public override void OnHitBot(HitBotEvent e)
     {
-        var bearing = BearingTo(e.X, e.Y);
-        if (bearing > -10 && bearing < 10)
-        {
-            Fire(3);
-        }
-        if (e.IsRammed)
-        {
-            TurnLeft(10);
+        // var bearing = BearingTo(e.X, e.Y);
+        // if (bearing > -10 && bearing < 10)
+        // {
+        //     Fire(3);
+        // }
+        // if (e.IsRammed)
+        // {
+        //     TurnLeft(10);
+        // }
+        if (!e.IsRammed){
+            AdjustGunForBodyTurn = false;
+            SetBack(100);
         }
     }
 }
