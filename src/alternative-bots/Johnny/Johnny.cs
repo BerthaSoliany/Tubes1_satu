@@ -8,7 +8,8 @@ using Microsoft.Extensions.Configuration.Json;
 
 public class Johnny : Bot
 {
-    int gunDirection = 1;
+    int gunDirection = 1; // Set gun director (CW or CCW)
+    int velocityCounter = 0; // Counter to set change of velocity after OnHitBot
     // The main method starts our bot
     static void Main(string[] args)
     {
@@ -28,7 +29,7 @@ public class Johnny : Bot
     // Constructor taking a BotInfo that is forwarded to the base class
     private Johnny(BotInfo botInfo) : base(botInfo) {}
 
-    // Called when a new round is started -> initialize and do some movement
+    // Called when a new round is started
     public override void Run()
     {
         BodyColor = Color.Cyan;
@@ -43,11 +44,10 @@ public class Johnny : Bot
             // Gun follows the body
             AdjustGunForBodyTurn = false;
 
-            // SpinBot basic movement
-            SetTurnLeft(10_000);
-            MaxSpeed = 5;
-            Forward(10_000);
-            TurnGunRight(360);
+            // SpinBot basic movement. Spins left 'infinitely'
+            SetTurnLeft(10000);
+            MaxSpeed = 6;
+            Forward(10000);
         }
     }
 
@@ -79,26 +79,26 @@ public class Johnny : Bot
 
         SetForward(10_000);
 
+        // Return speed back to original velocity some time after OnHitBot
+        if (velocityCounter == 3){
+            MaxSpeed = 6;
+            velocityCounter = 0;
+        }
+
         // Inverts gun direction per turn
         gunDirection = -gunDirection;
-        SetTurnGunRight(360 * gunDirection);
+        SetTurnGunRight(450 * gunDirection);
         Go();   
+        velocityCounter++;
     }
 
     public override void OnHitBot(HitBotEvent e)
     {
-        // var bearing = BearingTo(e.X, e.Y);
-        // if (bearing > -10 && bearing < 10)
-        // {
-        //     Fire(3);
-        // }
-        // if (e.IsRammed)
-        // {
-        //     TurnLeft(10);
-        // }
-        if (!e.IsRammed){
-            AdjustGunForBodyTurn = false;
-            SetBack(100);
-        }
+        // Set max speed to flee ram bot
+        MaxSpeed = 8;
+    }
+    public override void OnHitWall(HitWallEvent e){
+        // Reverse bot to avoid repeatedly hitting wall
+        SetBack(100);
     }
 }
