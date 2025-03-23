@@ -13,18 +13,16 @@ using Microsoft.Extensions.Configuration.Json;
 // ------------------------------------------------------------------
 public class Nearest : Bot
 {
-    int? nearestId;
-    int count = 0;
-    int frustration = 0;
-    // int turnDirection = 1;
-    double firepower;
-    double nearestDistance = double.MaxValue;
-    bool maju = false;
+    int? nearestId; // id of the nearest bot
+    double firepower; // firepower to shoot the bot
+    bool maju = false; // boolean to check if the bot is moving forward to other bot or not
+    int count = 0; // count how many time bot scanned and there's no bot with the nearestId
+    int frustration = 0; // increase when bullet hit wall or bullet hit bullet
+    double nearestDistance = double.MaxValue; // distance to the nearest bot
     // The main method starts our bot
     static void Main(string[] args)
     {
         
-
         // Read configuration file from current directory
         var builder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
@@ -44,11 +42,13 @@ public class Nearest : Bot
 
     public override void Run()
     {
+        // Set the colors of the bot
         BodyColor = Color.Red;
         TurretColor = Color.White;
         RadarColor = Color.Black;
         ScanColor = Color.Cyan;
-        
+
+        // Set the gun to turn independently of the body
         AdjustGunForBodyTurn = true;
         GunTurnRate = MaxGunTurnRate;
 
@@ -71,14 +71,71 @@ public class Nearest : Bot
     {
         double distance = DistanceTo(evt.X, evt.Y);
         
-
+        // change the nearest bot if there's new bot that is nearer
         if (distance < nearestDistance || nearestId == null){
             nearestId = evt.ScannedBotId;
             nearestDistance = distance;
         }
 
+        // shot the nearest bot
         if (evt.ScannedBotId == nearestId){
-            firepower = nearestDistance < 100 ? 3 : nearestDistance < 300 ? 2 : 1;
+            if (nearestDistance < 100) {
+                firepower = 3;
+            }
+            else if (nearestDistance < 300){
+                firepower = 2;
+            }
+            else {
+                firepower = 1;
+            }
+            Fire(firepower);
+        }
+        else count++; // increase count if the scanned bot is not the nearest bot
+
+        // change the nearest bot if there's no bot with the nearestId
+        if(count>=5) {
+            nearestId = null;
+            nearestDistance = double.MaxValue;
+            count = 0;
+        }
+
+        // move to the nearest bot if the bot frustrate (bullet not hit a bot)
+        if(frustration>=5){
+            if (evt.ScannedBotId == nearestId){
+                var bearing = BearingTo(evt.X, evt.Y);
+                TurnLeft(bearing);
+                Forward(DistanceTo(evt.X, evt.Y)/2);
+                frustration = 0;
+            }
+        }
+    }
+
+    // frustation increment happen if the bullet hit bullet or wall
+    public override void OnBulletHitBullet(BulletHitBulletEvent bulletHitBulletEvent){
+        frustration++;
+    }
+
+    public override void OnBulletHitWall(BulletHitWallEvent bulletHitWallEvent){
+        frustration++;
+    }
+
+    // reset frustration if the bullet hit a bot
+    public override void OnBulletHit(BulletHitBotEvent bulletHitBotEvent){
+        frustration = 0;
+    }
+
+    // if the bot hit the wall, move back
+    public override void OnHitWall(HitWallEvent e){
+        Back(100);
+    }
+
+    // reset nearestId and nearestDistance if the round ended
+    public override void OnRoundEnded(RoundEndedEvent e){
+        nearestId = null;
+        nearestDistance = double.MaxValue;
+    }
+}
+
             // if (evt.Energy > 16 || nearestDistance<=20)
             //     Fire(3);
             // else if (evt.Energy > 10 || (nearestDistance>20 && nearestDistance<=50))
@@ -89,39 +146,6 @@ public class Nearest : Bot
             //     Fire(.5);
             // else if (evt.Energy > .4)
             //     Fire(.1);
-            Fire(firepower);
-        }
-        else count++;
-        if(count>=5) {
-            nearestId = null;
-            nearestDistance = double.MaxValue;
-            count = 0;
-        }
-        if(frustration>=5){
-            if (evt.ScannedBotId == nearestId){
-                var bearing = BearingTo(evt.X, evt.Y);
-                TurnLeft(bearing);
-                Forward(DistanceTo(evt.X, evt.Y)/2);
-                frustration = 0;
-            }
-        }
-    }
-    
-    public override void OnBulletHitBullet(BulletHitBulletEvent bulletHitBulletEvent){
-        frustration++;
-    }
-
-    public override void OnBulletHitWall(BulletHitWallEvent bulletHitWallEvent){
-        frustration++;
-    }
-
-    public override void OnBulletHit(BulletHitBotEvent bulletHitBotEvent){
-        frustration = 0;
-    }
-
-    public override void OnHitWall(HitWallEvent e){
-        Back(50);
-    }
 
     // public override void OnHitBot(HitBotEvent e){
     //     if (e.VictimId == nearestId){
@@ -137,11 +161,3 @@ public class Nearest : Bot
     //         TurnLeft(10);
     //     }
     // }
-
-    public override void OnRoundEnded(RoundEndedEvent e){
-        nearestId = null;
-        nearestDistance = double.MaxValue;
-    }
-
-    
-}
