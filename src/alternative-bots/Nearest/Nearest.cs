@@ -47,6 +47,7 @@ public class Nearest : Bot
         TurretColor = Color.White;
         RadarColor = Color.Black;
         ScanColor = Color.Cyan;
+        BulletColor = Color.Orange;
 
         // Set the gun to turn independently of the body
         AdjustGunForBodyTurn = true;
@@ -93,14 +94,14 @@ public class Nearest : Bot
         else count++; // increase count if the scanned bot is not the nearest bot
 
         // change the nearest bot if there's no bot with the nearestId
-        if(count>=5) {
+        if(count>=3) {
             nearestId = null;
             nearestDistance = double.MaxValue;
             count = 0;
         }
 
         // move to the nearest bot if the bot frustrate (bullet not hit a bot)
-        if(frustration>=5){
+        if(frustration>=3){
             if (evt.ScannedBotId == nearestId){
                 var bearing = BearingTo(evt.X, evt.Y);
                 TurnLeft(bearing);
@@ -129,35 +130,19 @@ public class Nearest : Bot
         Back(100);
     }
 
+    // if the bot hit the bot, move back
+    public override void OnHitBot(HitBotEvent e)
+    {
+        nearestId = e.VictimId;
+        SetBack(150);
+        SetTurnLeft(95);
+        SetForward(100);
+        Rescan();
+    }
+
     // reset nearestId and nearestDistance if the round ended
     public override void OnRoundEnded(RoundEndedEvent e){
         nearestId = null;
         nearestDistance = double.MaxValue;
     }
 }
-
-            // if (evt.Energy > 16 || nearestDistance<=20)
-            //     Fire(3);
-            // else if (evt.Energy > 10 || (nearestDistance>20 && nearestDistance<=50))
-            //     Fire(2);
-            // else if (evt.Energy > 4)
-            //     Fire(1);
-            // else if (evt.Energy > 2)
-            //     Fire(.5);
-            // else if (evt.Energy > .4)
-            //     Fire(.1);
-
-    // public override void OnHitBot(HitBotEvent e){
-    //     if (e.VictimId == nearestId){
-    //         var bearing = BearingTo(e.X, e.Y);
-    //         if (bearing >= 0)
-    //             turnDirection = 1;
-    //         else
-    //             turnDirection = -1;
-
-    //         TurnLeft(bearing);
-    //         Forward(30);
-    //     } else if (e.IsRammed){
-    //         TurnLeft(10);
-    //     }
-    // }
