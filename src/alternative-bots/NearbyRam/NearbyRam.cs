@@ -13,19 +13,16 @@ using Microsoft.Extensions.Configuration.Json;
 // ------------------------------------------------------------------
 public class NearbyRam : Bot
 {
-    int? nearestId;
-    int count = 0;
-    int frustration = 0;
-    int mundur = 0;
-    // int turnDirection = 1;
-    double firepower;
-    double nearestDistance = double.MaxValue;
-    bool maju = false;
+    int? nearestId; // id of the nearest bot
+    double firepower; // firepower to shoot the bot
+    bool maju = false; // boolean to check if the bot is moving forward to other bot or not
+    int count = 0; // count how many time bot scanned and there's no bot with the nearestId
+    int mundur = 0; // count how many time bot hit wall or bot and need to move backward
+    double nearestDistance = double.MaxValue; // distance to the nearest bot
+    
     // The main method starts our bot
     static void Main(string[] args)
     {
-        
-
         // Read configuration file from current directory
         var builder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
@@ -45,14 +42,12 @@ public class NearbyRam : Bot
 
     public override void Run()
     {
+        // Set the colors of the bot
         BodyColor = Color.Cyan;
         TurretColor = Color.Pink;
         RadarColor = Color.White;
         ScanColor = Color.Black;
         BulletColor = Color.Red;
-
-        // AdjustGunForBodyTurn = true;
-        // GunTurnRate = MaxGunTurnRate;
 
         // Repeat while the bot is running
         while (IsRunning)
@@ -72,26 +67,26 @@ public class NearbyRam : Bot
     public override void OnScannedBot(ScannedBotEvent evt)
     {
         double distance = DistanceTo(evt.X, evt.Y);
-        
-        firepower = nearestDistance < 100 ? 3 : nearestDistance < 300 ? 2 : 1;
-        Fire(firepower);
-            // if (evt.Energy > 16 || nearestDistance<=20)
-            //     Fire(3);
-            // else if (evt.Energy > 10 || (nearestDistance>20 && nearestDistance<=50))
-            //     Fire(2);
-            // else if (evt.Energy > 4)
-            //     Fire(1);
-            // else if (evt.Energy > 2)
-            //     Fire(.5);
-            // else if (evt.Energy > .4)
-            //     Fire(.1);
 
+        // shot all the bot that is scanned
+        if (nearestDistance < 100) {
+                firepower = 3;
+            }
+            else if (nearestDistance < 300){
+                firepower = 2;
+            }
+            else {
+                firepower = 1;
+            }
+            Fire(firepower);
+
+        // change the nearest bot if there's new bot that is nearer
         if (distance < nearestDistance || nearestId == null){
             nearestId = evt.ScannedBotId;
             nearestDistance = distance;
         }
 
-        // if (evt.ScannedBotId == nearestId && maju==false){
+        // ram the nearest bot
         if (evt.ScannedBotId == nearestId){
             var bearing = BearingTo(evt.X, evt.Y);
             SetTurnLeft(bearing);
@@ -99,20 +94,16 @@ public class NearbyRam : Bot
             maju = true;
         }
         else count++; // count = jumlah bot yg discan tp bukan nearest
+        
+        // change the nearest bot if there's no bot with the nearestId
         if(count>=2) {
             nearestId = null;
             nearestDistance = double.MaxValue;
             count = 0;
+            Rescan();
         }
-        // if(frustration>=5){
-        //     if (evt.ScannedBotId == nearestId){
-        //         var bearing = BearingTo(evt.X, evt.Y);
-        //         TurnLeft(bearing);
-        //         Forward(DistanceTo(evt.X, evt.Y)/2);
-        //         frustration = 0;
-        //     }
-        // }
 
+        // if the bot is being hit to much, move backward
         // bisa ditaruh di OnHitBot juga
         if (mundur>=3){
             if (ArenaWidth-X == ArenaWidth-5 || ArenaHeight-Y == ArenaHeight-5){
@@ -124,54 +115,36 @@ public class NearbyRam : Bot
             mundur = 0;
         }
     }
-    
-    public override void OnBulletHitBullet(BulletHitBulletEvent bulletHitBulletEvent){
-        frustration++;
-    }
 
-    public override void OnBulletHitWall(BulletHitWallEvent bulletHitWallEvent){
-        frustration++;
-    }
-
-    public override void OnBulletHit(BulletHitBotEvent bulletHitBotEvent){
-        frustration = 0;
+    // if the bullet hit the bot, increase mundur
+    public override void OnBulletHit(BulletHitBotEvent e){
         mundur++;
     }
 
+    // if the bot hit the wall, move backward and increase mundur
     public override void OnHitWall(HitWallEvent e){
         Back(100);
         mundur++;
     }
 
-    public virtual void OnHitByBullet(HitByBulletEvent bulletHitBotEvent){
+    // if the bot hit by bullet, increase mundur
+    public override void OnHitByBullet(HitByBulletEvent e){
         mundur++;
     }
 
+    // if the this API triggered but the bot is not the one who rammed, increase mundur
     public override void OnHitBot(HitBotEvent e){
         if (!e.IsRammed){
             mundur++;
+        } else {
+            mundur--;
         }
     }
 
-    // public override void OnHitBot(HitBotEvent e){
-    //     if (e.VictimId == nearestId){
-    //         var bearing = BearingTo(e.X, e.Y);
-    //         if (bearing >= 0)
-    //             turnDirection = 1;
-    //         else
-    //             turnDirection = -1;
-
-    //         TurnLeft(bearing);
-    //         Forward(30);
-    //     } else if (e.IsRammed){
-    //         TurnLeft(10);
-    //     }
-    // }
-
+    // reset the nearest bot and nearest distance when the round ended
     public override void OnRoundEnded(RoundEndedEvent e){
         nearestId = null;
         nearestDistance = double.MaxValue;
     }
-
     
 }
