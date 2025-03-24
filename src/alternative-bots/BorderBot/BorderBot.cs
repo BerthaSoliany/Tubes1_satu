@@ -31,7 +31,7 @@ public class BorderBot : Bot
     
     // Enemy tracking
     private double lastEnemyID = -1;
-    private double lastEnemyDirection = 0;
+    private double lastEnemyDirection = -1;
     
     // Constants
     private const double WALL_DISTANCE = 20;       // Distance to maintain from walls
@@ -51,8 +51,8 @@ public class BorderBot : Bot
         BodyColor = Color.Gray;
         GunColor = Color.DarkGray;
         RadarColor = Color.LightGray;
-        ScanColor = Color.Red;
-        BulletColor = Color.Yellow;
+        ScanColor = Color.Yellow;
+        BulletColor = Color.Red;
         
         while (IsRunning) 
         {
@@ -79,7 +79,7 @@ public class BorderBot : Bot
             }
             // Handle escape completion
             if(escaping){
-                if(DistanceRemaining < 20 && Math.Abs(TurnRemaining) < 10){
+                if(DistanceRemaining == 0){
                     // Escape complete
                     escaping = false;
                     // Console.WriteLine("Escape complete!");
@@ -127,7 +127,7 @@ public class BorderBot : Bot
         OnTopWall = false;
         OnBottomWall = false;
         lastEnemyID = -1;
-        lastEnemyDirection = 0;
+        lastEnemyDirection = -1;
     }
     
     /// <summary>
@@ -148,13 +148,13 @@ public class BorderBot : Bot
             // Handle forward/backward movement along wall
             if(maju){
                 if(DistanceRemaining == 0){
-                    SetForward(100);
+                    SetForward(150);
                     maju = false;
                 }
             }
             else {
                 if(DistanceRemaining == 0){
-                    SetBack(100);
+                    SetBack(150);
                     maju = true;
                 }
             }
@@ -164,15 +164,16 @@ public class BorderBot : Bot
     public override void OnScannedBot(ScannedBotEvent e)
     {
         // Track the enemy position and time
-        if(e.ScannedBotId == lastEnemyID) {
-            lastEnemyDirection = e.Direction;
-        }
-        // Calculate distance and optimal firepower
-        double distance = DistanceTo(e.X, e.Y);
-        double firepower = CalculateOptimalFirepower(distance, e.Energy);
+        // if(e.ScannedBotId == lastEnemyID) {
+        //     lastEnemyDirection = e.Direction;
+        // }
+        // // Calculate distance and optimal firepower
+        // double distance = DistanceTo(e.X, e.Y);
+        // double firepower = CalculateOptimalFirepower(distance, e.Energy);
         
-        // Fire at the enemy
-        SetFire(firepower);
+        // // Fire at the enemy
+        // SetFire(firepower);
+        SetFire(3);
     }
     
     /// <summary>
@@ -232,8 +233,16 @@ public class BorderBot : Bot
     /// </summary>
     public void EmergencyEscape() {
         // First, stop any current movement to avoid continuing whatever got us stuck
-        StopReset();
-
+        if(lastEnemyDirection == -1) return;
+        if(!escaping) {
+            // Console.WriteLine("Emergency escape!");
+            StopReset();
+        }
+        else{
+            // Console.WriteLine("Emergency escape in progress!");
+        }
+        // Set escaping flag
+        escaping = true;
         // Debug output
         // Console.WriteLine($"EMERGENCY ESCAPE at X:{X:F1} Y:{Y:F1} Dir:{Direction:F1}");
         // Console.WriteLine($"Wall distances: L:{X:F1} R:{ArenaWidth-X:F1} B:{Y:F1} T:{ArenaHeight-Y:F1}");
@@ -360,29 +369,29 @@ public class BorderBot : Bot
         }
         // Calculate the turn angle needed (use shortest path)
         double turnAngle = escapeAngle - Direction;
-        Console.WriteLine("escapeAngle " + escapeAngle);
-        Console.WriteLine("turnAngle " + turnAngle);
-        Console.WriteLine("Direction " + Direction);
+        // Console.WriteLine("escapeAngle " + escapeAngle);
+        // Console.WriteLine("turnAngle " + turnAngle);
+        // Console.WriteLine("Direction " + Direction);
         // CRITICAL: Use SetTurnRight/Left and SetForward to make moves non-blocking
         if(escapeAngle == Direction) {
             SetForward(200);
-            Console.WriteLine("Lari Maju");
+            // Console.WriteLine("Lari Maju");
         }
         else if(escapeAngle == Direction + 180 || escapeAngle == Direction - 180) {
             SetBack(200);
-            Console.WriteLine("Lari Mundur");
+            // Console.WriteLine("Lari Mundur");
         }
         else{
-            if(turnAngle < 0) turnAngle += 360;
-            if(turnAngle < 90) {
-                SetTurnBody(turnAngle);
-                SetForward(200);
+            SetTurnBody(turnAngle);
+            SetForward(200);
+            // Console.WriteLine("Lari Belok");
+            awal2 = true;
+            if(turnAngle < 0){
+                kiri = false;
             }
             else{
-                SetTurnBody(turnAngle);
-                SetBack(200);
+                kiri = true;
             }
-            Console.WriteLine("Lari Belok");
         }
         
         // Move IMMEDIATELY while turning - don't wait for turn to complete
@@ -392,8 +401,7 @@ public class BorderBot : Bot
         // // Keep gun moving
         SetTurnGunLeft(10000);
         
-        // Set escaping flag
-        escaping = true;
+        
     }
     
     /// <summary>
@@ -404,6 +412,7 @@ public class BorderBot : Bot
         SetBack(0);
         SetTurnLeft(0);
         SetTurnRight(0);
+        SetTurnGunLeft(0);
     }
     
     /// <summary>
