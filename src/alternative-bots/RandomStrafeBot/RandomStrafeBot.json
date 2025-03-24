@@ -1,0 +1,11 @@
+{
+    "name": "RandomStrafeBot",
+    "version": "1.0",
+    "authors": ["Kelompok satu (49)"],
+    "description": "Bot that has random strafing movement",
+    "homepage": "",
+    "countryCodes": ["id"],
+    "platform": ".Net 6.0",
+    "programmingLang": "C# 10.0"
+  }
+  
