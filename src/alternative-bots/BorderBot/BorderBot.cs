@@ -90,7 +90,7 @@ public class BorderBot : Bot
             Go();
         }
     }
-    
+
     private void ScanSweepRadar() {
         if(kiri) {
             if(GunTurnRemaining == 0){
@@ -148,6 +148,9 @@ public class BorderBot : Bot
 
     public override void OnScannedBot(ScannedBotEvent e)
     {
+        if(e.ScannedBotId == lastEnemyID) {
+            lastEnemyDirection = e.Direction;
+        }
         SetFire(3);
     }
 
