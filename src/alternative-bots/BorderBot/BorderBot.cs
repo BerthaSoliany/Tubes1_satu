@@ -61,18 +61,7 @@ public class BorderBot : Bot
             }
             
             if(!awal2){
-                if(kiri) {
-                    if(GunTurnRemaining == 0){
-                        SetTurnGunLeft(SCAN_SWEEP);
-                        kiri = false;
-                    }
-                }
-                else {
-                    if(GunTurnRemaining == 0){
-                        SetTurnGunRight(SCAN_SWEEP);
-                        kiri = true;
-                    }
-                }
+                ScanSweepRadar();
             }
             if(escaping){
                 if(DistanceRemaining == 0){
@@ -102,6 +91,21 @@ public class BorderBot : Bot
         }
     }
     
+    private void ScanSweepRadar() {
+        if(kiri) {
+            if(GunTurnRemaining == 0){
+                SetTurnGunLeft(SCAN_SWEEP);
+                kiri = false;
+            }
+        }
+        else {
+            if(GunTurnRemaining == 0){
+                SetTurnGunRight(SCAN_SWEEP);
+                kiri = true;
+            }
+        }
+    }
+
     private void ResetState() {
         kiri = false;
         maju = true;
