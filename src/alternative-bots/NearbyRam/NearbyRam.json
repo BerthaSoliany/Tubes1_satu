@@ -1,10 +1,8 @@
 {
   "name": "Nearby Ram",
   "version": "1.0",
-  "authors": [
-    "Ram the nearby bot"
-  ],
-  "description": "",
+  "authors": ["Kelompok satu (49)"],
+  "description": "Bot that focus on ramming bot",
   "homepage": "",
   "countryCodes": [
     "id"
