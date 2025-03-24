@@ -26,37 +26,24 @@ public class RandomStrafeBot : Bot
         TracksColor = Color.Gray;
         GunColor = Color.Red;
 
-        AdjustGunForBodyTurn = true; // Memisahkan gun dan radar dari body (masih ngebug jg)
+        AdjustGunForBodyTurn = true; // Memisahkan gun dan radar dari body
         GunTurnRate = MaxGunTurnRate;
 
         while (IsRunning)
         {
-            // avoiding wall nya masih ngebug
-            // double distanceToWall = CalculateDistanceToWall();
-            // if (distanceToWall < 100) 
-            // {
-            //     if(!isAvoidingWall){
-            //         SetTurnRight(180);
-            //         SetForward(100);
-            //     }
-            //     isAvoidingWall = true;
-            // }
-            // else 
             SetTurnGunLeft(10000);
             if (isStopped)
             {
-                isAvoidingWall = false;
                 isStopped = false;
-                strafeDirection = (rand.Next(2) == 0) ? 1 : -1; // Randomize strafe direction
+                strafeDirection = (rand.Next(2) == 0) ? 1 : -1; // 50 50 kemungkinan untuk strafe ke kanan atau kiri
             }
             else
             {
                 isAvoidingWall = false;
-                // Strafe movement
                 SetTurnRight(30 * strafeDirection);
                 SetForward(100);
-                // Occasionally stop (stop-and-go strategy)
-                if (rand.Next(5) == 0)
+
+                if (rand.Next(5) == 0) // 20 persen kemungkinan untuk Stop
                 {
                     isStopped = true;
                     SetStop();
@@ -73,20 +60,6 @@ public class RandomStrafeBot : Bot
     {
         TurnRight(180);
         Forward(150);
-    }
-
-    private double CalculateDistanceToWall()
-    {
-        double width = ArenaWidth;
-        double height = ArenaHeight;
-        
-        double distanceToLeft = X;
-        double distanceToRight = width - X;
-        double distanceToBottom = Y;
-        double distanceToTop = height - Y;
-        
-        return Math.Min(Math.Min(distanceToLeft, distanceToRight), 
-                    Math.Min(distanceToBottom, distanceToTop));
     }
 
     public override void OnHitBot(HitBotEvent e)
