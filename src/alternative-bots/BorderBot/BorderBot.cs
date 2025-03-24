@@ -13,13 +13,13 @@ public class BorderBot : Bot
     
     // State flags
     private bool escaping = false;
-    private bool kiri = false;
-    private bool maju = true;
-    private bool awal = true;
-    private bool awal2 = true;
+    private bool kiri = false; // boolean for radar sweeping direction
+    private bool maju = true; // boolean for oscillating movement
+    private bool awal = true; // boolean for position state of the bot. false if on a wall, otherwise true.
+    private bool awal2 = true; // boolean for adjusting gun direction to body direction 
     
     // Wall position tracking
-    private bool OnLeftWall = false;
+    private bool OnLeftWall = false; 
     private bool OnRightWall = false;
     private bool OnTopWall = false;
     private bool OnBottomWall = false;
@@ -56,15 +56,15 @@ public class BorderBot : Bot
         
         while (IsRunning) 
         {
-            if(DistanceToWall() > WALL_THRESHOLD && !escaping && !awal){
+            if(DistanceToWall() > WALL_THRESHOLD && !escaping && !awal){ // on the middle of the arena, but not escaping
                 ResetState();
             }
             
-            if(!awal2){
+            if(!awal2){ // no need to reset gun direction
                 ScanSweepRadar();
             }
             if(escaping){
-                if(DistanceRemaining == 0){
+                if(DistanceRemaining == 0){ // escape finished
                     escaping = false;
                     StopReset();
                     if(DistanceToWall() > WALL_THRESHOLD) {
@@ -74,11 +74,11 @@ public class BorderBot : Bot
                     }
                 }
             }
-            else if(awal){
+            else if(awal){ // initial state, go to nearest wall
                 GoToNearestWall();
                 awal = false;
             }
-            else {
+            else { // already at a wall
                 if(IsNearCorner()){
                     AwayFromCorner(); // avoid corner
                 }
@@ -91,7 +91,7 @@ public class BorderBot : Bot
         }
     }
 
-    private void ScanSweepRadar() {
+    private void ScanSweepRadar() { // pergerakan gun dan radar, 180 derajat bolak-balik, dapat scanning seluruh arena.
         if(kiri) {
             if(GunTurnRemaining == 0){
                 SetTurnGunLeft(SCAN_SWEEP);
@@ -106,7 +106,7 @@ public class BorderBot : Bot
         }
     }
 
-    private void ResetState() {
+    private void ResetState() { // reset all value to default
         kiri = false;
         maju = true;
         awal = true;
@@ -120,7 +120,7 @@ public class BorderBot : Bot
         lastEnemyDirection = -1;
     }
     
-    private void PatrolWall() {
+    private void PatrolWall() { // when bot on wall, align gun with body then oscillate
         // Enable independent gun movement
         AdjustGunForBodyTurn = true;
         
@@ -146,9 +146,9 @@ public class BorderBot : Bot
         }
     }
 
-    public override void OnScannedBot(ScannedBotEvent e)
+    public override void OnScannedBot(ScannedBotEvent e) 
     {
-        if(e.ScannedBotId == lastEnemyID) {
+        if(e.ScannedBotId == lastEnemyID) { // save the direction of enemy that ramming this bot.
             lastEnemyDirection = e.Direction;
         }
         SetFire(3);
@@ -157,7 +157,7 @@ public class BorderBot : Bot
     public override void OnHitBot(HitBotEvent e)
     {
         Interruptible = false;
-        lastEnemyID = e.VictimId;
+        lastEnemyID = e.VictimId; // save the id of the enemy that ramming this bot.
         if(!escaping) {
             EmergencyEscape();
         }
@@ -171,7 +171,7 @@ public class BorderBot : Bot
         }
     }
 
-    public void EmergencyEscape() {
+    public void EmergencyEscape() { // escape from the enemy, to the counter direction from the rammed direction
         if(lastEnemyDirection == -1) return;
         if(!escaping) {
             StopReset(); // prioritas escape
@@ -284,7 +284,7 @@ public class BorderBot : Bot
         SetTurnGunLeft(10000);
     }
     
-    public void StopReset() {
+    public void StopReset() { // stop all movement
         SetForward(0);
         SetBack(0);
         SetTurnLeft(0);
@@ -292,7 +292,7 @@ public class BorderBot : Bot
         SetTurnGunLeft(0);
     }
     
-    private double DistanceToWall(){
+    private double DistanceToWall(){ // returns the distance to closest wall
         double distanceToLeft = X;
         double distanceToRight = ArenaWidth - X;
         double distanceToBottom = Y;
@@ -302,12 +302,12 @@ public class BorderBot : Bot
                     Math.Min(distanceToBottom, distanceToTop));
     }
     
-    private bool IsNearCorner(){
+    private bool IsNearCorner(){ 
         return (X < CORNER_THRESHOLD || (ArenaWidth - X) < CORNER_THRESHOLD) &&
                 (Y < CORNER_THRESHOLD || (ArenaHeight - Y) < CORNER_THRESHOLD);
     }
 
-    private void AwayFromCorner(){
+    private void AwayFromCorner(){ // move away from corner
         if(X < CORNER_THRESHOLD){
             if(Y < CORNER_THRESHOLD){
                 // Bottom left corner
@@ -350,7 +350,7 @@ public class BorderBot : Bot
         }
     }
 
-    private void UpdateWallFlags() {
+    private void UpdateWallFlags() { // update bot's position state
         // Reset all flags
         OnTopWall = false;
         OnBottomWall = false;
@@ -375,7 +375,7 @@ public class BorderBot : Bot
         }
     }
     
-    private void GoToNearestWall(){
+    private void GoToNearestWall(){ // like it said, go to nearest wall
         UpdateWallFlags();
         
        // Calculate distances to walls
