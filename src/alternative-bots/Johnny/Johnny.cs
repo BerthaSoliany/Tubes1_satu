@@ -67,17 +67,20 @@ public class Johnny : Bot
         SetTurnGunRight(gunTurn);
 
         // Set SmartFire
-        if (distance > 200 && Energy > 10){
-            SetFire(2.4);
+        if (distance > 500){
+            SetFire(1.5);
+        }
+        else if (distance > 200 && distance < 500 && Energy > 10){
+            SetFire(2.3);
         }
         else if (distance <= 200 && Energy > 10){
             SetFire(3);
         }
-        else if (distance < 50 && Energy < 10){
-            SetFire(1.5);
+        else if (distance < 100 && Energy < 10){
+            SetFire(1.1);
         }
 
-        SetForward(10_000);
+        SetForward(10000);
 
         // Return speed back to original velocity some time after OnHitBot
         if (velocityCounter == 3){
