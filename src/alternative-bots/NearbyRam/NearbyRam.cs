@@ -36,7 +36,7 @@ public class NearbyRam : Bot
     public override void Run()
     {
         // Set the colors of the bot
-        BodyColor = Color.Cyan;
+        BodyColor = Color.Red;
         TurretColor = Color.Pink;
         RadarColor = Color.White;
         ScanColor = Color.Black;
