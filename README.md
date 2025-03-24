@@ -1,4 +1,5 @@
 # satu: Tugas Besar I IF2211 Strategi Algoritma
+Pemanfaatan Algoritma Greedy dalam pembuatan bot permainan Robocode Tank Royale
 
 ## Daftar Isi
 1. [Tentang Proyek](#tentang-proyek)
