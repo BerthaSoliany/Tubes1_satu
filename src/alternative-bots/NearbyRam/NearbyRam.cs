@@ -46,7 +46,7 @@ public class NearbyRam : Bot
         while (IsRunning)
         {
             if(DistanceRemaining == 0){
-\                SetTurnLeft(10_000);
+                SetTurnLeft(10_000);
                 MaxSpeed = 8;
                 Forward(10_000);
             }
@@ -85,7 +85,6 @@ public class NearbyRam : Bot
 
     // if the bot hit the bot, move forward
     public override void OnHitBot(HitBotEvent e){
-        AdjustGunForBodyTurn = false;
         if (e.IsRammed){
             SetForward(DistanceTo(e.X, e.Y));
         }
