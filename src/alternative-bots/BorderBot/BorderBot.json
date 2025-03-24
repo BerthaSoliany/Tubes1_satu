@@ -1,8 +1,8 @@
 {
   "name": "Border Bot",
   "version": "1.0",
-  "authors": ["IRK Lab Assistant"],
-  "description": "A bot that drives forward and backward, and fires a bullet",
+  "authors": ["Kelompok satu (49)"],
+  "description": "A bot that drives along walls, efficiently scans for enemies, and has an improved escape mechanism",
   "homepage": "",
   "countryCodes": ["id"],
   "platform": ".Net 6.0",
