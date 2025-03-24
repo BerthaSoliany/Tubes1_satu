@@ -8,7 +8,6 @@ public class RandomStrafeBot : Bot
     private readonly Random rand = new Random();
     private double strafeDirection = 1; 
     private bool isStopped = false;     
-    private bool isAvoidingWall = false;
 
     static void Main(string[] args)
     {
@@ -31,7 +30,7 @@ public class RandomStrafeBot : Bot
 
         while (IsRunning)
         {
-            SetTurnGunLeft(10000);
+            SetTurnGunLeft(10000); // Continuously turning gun
             if (isStopped)
             {
                 isStopped = false;
@@ -39,14 +38,14 @@ public class RandomStrafeBot : Bot
             }
             else
             {
-                isAvoidingWall = false;
+                // jika strafeDirection = 1, akan strafe ke kanan. Sebaliknya jika strafeDirection = -1, akan strafe ke kiri
                 SetTurnRight(30 * strafeDirection);
                 SetForward(100);
 
                 if (rand.Next(5) == 0) // 20 persen kemungkinan untuk Stop
                 {
                     isStopped = true;
-                    SetStop();
+                    SetStop(); // stop semua pergerakan yang sedang berjalan
                 }
             }
             Go();
@@ -58,12 +57,14 @@ public class RandomStrafeBot : Bot
 
     public override void OnHitWall(HitWallEvent e)
     {
+        // putar balik lalu maju kembali ke tengah arena
         TurnRight(180);
         Forward(150);
     }
 
     public override void OnHitBot(HitBotEvent e)
     {
+        // Jika bisa ditembak, tembak
         double bearing = BearingTo(e.X, e.Y);
         if (Math.Abs(bearing) < 10 && GunHeat == 0)
         {
