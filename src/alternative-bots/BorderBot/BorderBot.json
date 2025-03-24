@@ -1,0 +1,10 @@
+{
+  "name": "Border Bot",
+  "version": "1.0",
+  "authors": ["Kelompok satu (49)"],
+  "description": "A bot that drives along walls, efficiently scans for enemies, and has an improved escape mechanism",
+  "homepage": "",
+  "countryCodes": ["id"],
+  "platform": ".Net 6.0",
+  "programmingLang": "C# 10.0"
+}
